@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Timeout: 60
+    Handler: app.handler
+    Runtime: nodejs10.x
+Resources:
+  AccountsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: accounts
+      CodeUri: s3://sam-app-deploy/30fe732fb2419a49a206cb00fe83d8be
+      Events:
+        Accounts:
+          Type: Api
+          Properties:
+            Path: /accounts
+            Method: get
+        VerifyPIN:
+          Type: Api
+          Properties:
+            Path: /accounts/verifyPIN
+            Method: post
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: AccountsTable
+      Policies: AmazonDynamoDBFullAccess
+  AccountsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: accounts
+      AttributeDefinitions:
+      - AttributeName: accountNo
+        AttributeType: S
+      - AttributeName: cardNo
+        AttributeType: S
+      KeySchema:
+      - AttributeName: accountNo
+        KeyType: HASH
+      - AttributeName: cardNo
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5

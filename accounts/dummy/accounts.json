@@ -1,0 +1,23 @@
+[
+  {
+    "accountNo": "ACC12345678901",
+    "cardNo": "12345678901",
+    "name": "Jeppe",
+    "pin": "1234",
+    "availableBalance": 200000
+  },
+  {
+    "accountNo": "ACC12345678902",
+    "cardNo": "12345678902",
+    "name": "Nathan",
+    "pin": "5678",
+    "availableBalance": 1000000
+  },
+  {
+    "accountNo": "ACC12345678903",
+    "cardNo": "12345678903",
+    "name": "Moustafa",
+    "pin": "9100",
+    "availableBalance": 200000
+  }
+]
