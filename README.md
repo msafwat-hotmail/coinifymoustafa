@@ -1,6 +1,6 @@
 # Coinify Solution @ Moustafa Safwat
 
-This is a ATM Withdraw sloution for Coinify assignment by Moustafa Safwat.
+This is ATM Withdraw sloution for Coinify assignment by Moustafa Safwat.
 
 ## Ecosystem
 
