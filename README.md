@@ -58,6 +58,18 @@ $ npm start
 # on OPTIONS method> Add method response 200 > Add response model with schema > Deploy API
 ```
 
+## How It Works
+
+We have two main **Bounded Contexts**. **Customers Accounts** and **Transactions**. Each represented by Microservice.
+
+**Accounts Microservice** under "./accounts" is an **AWS Lambda**.
+
+**Transactions or Operations Microservice** should be an AWS Lambda as well. It is not in assigment scope, but the idea is to put the withdraw amount on hold then withdraw then acknowledge ATM for approval.
+
+Each Microservice should has it's own storage, for example Accounts can be presitance **Redis** for fast Cards retrival, and Operations can be **MYSQL** for transaction support. In our demo I used **DynamoDB** for **simplicity and keep Serverless**.
+
+The API Gateway is our Microservices interface to external world, our communication is REST, we can support authorizer as well for our microservices.
+
 ## Endpoints
 
 - GET /accounts
@@ -70,6 +82,14 @@ Accounts Microservice
 
 ```bash
 $ cd accounts
+$ npm install
+$ npm run test
+```
+
+UI
+
+```bash
+$ cd ui
 $ npm install
 $ npm run test
 ```
