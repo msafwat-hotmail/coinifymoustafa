@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -17,14 +17,13 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
-import FiberPin from "@material-ui/icons/FiberPin";
 import AttachMoney from "@material-ui/icons/AttachMoney";
 import Copyright from "@material-ui/icons/Copyright";
-import Divider from "@material-ui/core/Divider";
-import TextField from "@material-ui/core/TextField";
 
 import { getAccounts, verifyPIN } from "./services/httpService";
 import Typography from "@material-ui/core/Typography";
+
+import payoutBoxesWithdraw from "./helper/payoutBoxesWithdraw";
 
 export default function App() {
   const classes = useStyles();
@@ -91,8 +90,8 @@ export default function App() {
       !balanceInsufficient
     ) {
       let amountInt = parseInt(amount);
-      let remaning = amountInt;
-      let result = {};
+      // let remaning = amountInt;
+      // let result = {};
 
       let total = 0;
       for (let [key, value] of Object.entries(boxes)) {
@@ -113,39 +112,10 @@ export default function App() {
         return;
       }
 
-      const keys = Object.keys(boxes)
-        .map(k => parseInt(k))
-        .filter(k => k <= amountInt)
-        .sort(function(a, b) {
-          return b - a;
-        });
+      let result = payoutBoxesWithdraw(boxes, amountInt);
 
-      let backup = JSON.stringify(boxes);
-
-      let lastSeenCurrancy = 0;
-      while (remaning > 0) {
-        if (!boxes[keys[lastSeenCurrancy]]) {
-          break;
-        }
-
-        if (
-          keys[lastSeenCurrancy] > remaning ||
-          boxes[keys[lastSeenCurrancy]].avaliable === 0
-        ) {
-          lastSeenCurrancy++;
-        } else {
-          remaning = remaning - keys[lastSeenCurrancy];
-          boxes[keys[lastSeenCurrancy]].avaliable--;
-
-          if (!result[keys[lastSeenCurrancy]])
-            result[keys[lastSeenCurrancy]] = 1;
-          else
-            result[keys[lastSeenCurrancy]] = result[keys[lastSeenCurrancy]] + 1;
-        }
-      }
-
-      if (remaning > 0) {
-        setBoxes(JSON.parse(backup));
+      if (!result.result || Object.keys(result.result).length === 0) {
+        setBoxes(result.boxes);
         setAtmInsufficient(true);
         setTimeout(function() {
           setPin("");
@@ -155,37 +125,37 @@ export default function App() {
           setAtmInsufficient(false);
           setBalanceInsufficient(false);
         }, 10000);
-        return;
+      } else {
+        let notesText = "";
+        let g20mmText = "";
+        let le20mmText = "";
+
+        let entries = Object.entries(result.result);
+        entries.sort(function(first, second) {
+          return second[0] - first[0];
+        });
+        entries.forEach(([key, value]) => {
+          if (boxes[key].type === "NOTES") notesText += `${value}x${key} `;
+          else if (boxes[key].type === "G20MM") g20mmText += `${value}x${key} `;
+          else if (boxes[key].type === "LE20MM")
+            le20mmText += `${value}x${key} `;
+        });
+
+        setNotes(notesText);
+        setG20mm(g20mmText);
+        setLe20mm(le20mmText);
+        setCurrentScreen(3);
+
+        customer.availableBalance -= amountInt;
+
+        customers.filter(
+          x => x.cardNo === customer.cardNo
+        )[0].availableBalance -= amountInt;
+
+        setTimeout(function() {
+          setCurrentScreen(0);
+        }, 30 * 1000);
       }
-
-      let notesText = "";
-      let g20mmText = "";
-      let le20mmText = "";
-
-      let entries = Object.entries(result);
-      entries.sort(function(first, second) {
-        return second[0] - first[0];
-      });
-      entries.forEach(([key, value]) => {
-        if (boxes[key].type === "NOTES") notesText += `${value}x${key} `;
-        else if (boxes[key].type === "G20MM") g20mmText += `${value}x${key} `;
-        else if (boxes[key].type === "LE20MM") le20mmText += `${value}x${key} `;
-      });
-
-      setNotes(notesText);
-      setG20mm(g20mmText);
-      setLe20mm(le20mmText);
-      setCurrentScreen(3);
-
-      customer.availableBalance -= amountInt;
-
-      customers.filter(
-        x => x.cardNo === customer.cardNo
-      )[0].availableBalance -= amountInt;
-
-      setTimeout(function() {
-        setCurrentScreen(0);
-      }, 30 * 1000);
     }
   };
 
